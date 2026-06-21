@@ -469,3 +469,26 @@ localStorage.getItem("weekend");
 
 </body>
 </html>
+:root{
+  --primary:#003366;
+  --secondary:#f4f6f9;
+  --accent:#0066cc;
+  --text:#333;
+}
+
+body{
+  background:var(--secondary);
+  color:var(--text);
+}
+
+.notice-header{
+  background:var(--primary);
+  color:white;
+  padding:20px;
+  border-radius:10px;
+}
+
+button{
+  background:var(--primary);
+  color:white;
+}
