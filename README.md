@@ -469,3 +469,108 @@ localStorage.getItem("weekend");
 
 </body>
 </html>
+<label>رابط شعار الشركة</label>
+<input type="text" id="logo" placeholder="https://example.com/logo.png">
+
+<label>رابط صورة الخلفية</label>
+<input type="text" id="background">
+
+<label>لون السمة</label>
+<input type="color" id="themeColor" value="#003366">
+localStorage.setItem("logo",
+document.getElementById("logo").value);
+
+localStorage.setItem("background",
+document.getElementById("background").value);
+
+localStorage.setItem("themeColor",
+document.getElementById("themeColor").value);
+:root{
+ --theme:#003366;
+}
+
+body{
+ margin:0;
+ padding:20px;
+ background-size:cover;
+ background-position:center;
+ background-repeat:no-repeat;
+ font-family:Tahoma;
+}
+
+.notice{
+ background:rgba(255,255,255,.95);
+ border-radius:15px;
+ padding:30px;
+ max-width:1000px;
+ margin:auto;
+ box-shadow:0 0 20px rgba(0,0,0,.15);
+}
+
+.header{
+ text-align:center;
+ border-bottom:4px solid var(--theme);
+ padding-bottom:15px;
+ margin-bottom:20px;
+}
+
+.header h1{
+ color:var(--theme);
+}
+
+.title{
+ background:var(--theme);
+ color:white;
+ font-weight:bold;
+ width:35%;
+}
+<div class="header">
+
+<img id="companyLogo"
+style="max-height:120px;max-width:250px;">
+
+<h1>
+📢 تعميم ساعات عمل الفرع
+</h1>
+
+</div>
+<tr>
+<td class="title">🏢 اسم الفرع</td>
+<td id="branch"></td>
+</tr>
+
+<tr>
+<td class="title">👨‍💼 مشرف الفرع</td>
+<td id="supervisor"></td>
+</tr>
+
+<tr>
+<td class="title">📋 مسؤول الفرع</td>
+<td id="manager"></td>
+</tr>
+
+<tr>
+<td class="title">📱 رقم الجوال</td>
+<td id="phone"></td>
+</tr>
+
+<tr>
+<td class="title">🕒 الأحد - الخميس</td>
+<td id="weekday"></td>
+</tr>
+
+<tr>
+<td class="title">🌙 الجمعة - السبت</td>
+<td id="weekend"></td>
+</tr>
+document.body.style.backgroundImage =
+"url('" + localStorage.getItem("background") + "')";
+
+document.getElementById("companyLogo").src =
+localStorage.getItem("logo");
+
+document.documentElement.style.setProperty(
+'--theme',
+localStorage.getItem("themeColor")
+);
+
