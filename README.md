@@ -1,314 +1,191 @@
 project/
 │
-├── index.html        (صفحة عرض التعميم)
-├── admin.html        (لوحة التحكم)
-├── style.css         (التصميم)
-├── script.js         (الوظائف)
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>لوحة إدارة التعميم</title>
+├── index.html           صفحة عرض التعميم
+├── admin.html           لوحة التحكم
+├── archive.html         أرشيف التعاميم
+│
+├── css/
+│   └── style.css
+│
+├── js/
+│   ├── admin.js
+│   ├── notice.js
+│   └── archive.js
+│
+├── notices/
+│   └── notice-001.json
+│
+└── assets/
+    ├── logos/
+    └── images/
+    <label>رقم التعميم</label>
+<input id="noticeNo">
 
-<link rel="stylesheet" href="style.css">
+<label>تاريخ التعميم</label>
+<input type="date" id="noticeDate">
 
-<style>
-.admin-box{
-max-width:900px;
-margin:auto;
-background:#fff;
-padding:30px;
-border-radius:15px;
-box-shadow:0 0 15px rgba(0,0,0,.1);
-}
+<label>اسم الشركة</label>
+<input id="company">
 
-input,textarea{
-width:100%;
-padding:12px;
-margin-top:5px;
-margin-bottom:15px;
-border:1px solid #ddd;
-border-radius:8px;
-}
+<label>رابط QR Code</label>
+<input id="qrCode">
 
-button{
-background:#003366;
-color:#fff;
-border:none;
-padding:15px;
-width:100%;
-cursor:pointer;
-font-size:18px;
-border-radius:10px;
-}
-</style>
+<label>اسم المعتمد</label>
+<input id="approvedBy">
 
-</head>
-<body>
-
-<div class="admin-box">
-
-<h2>⚙️ لوحة إنشاء التعميم</h2>
-
-<label>اسم الفرع</label>
-<input id="branch">
-
-<label>مشرف الفرع</label>
-<input id="supervisor">
-
-<label>مسؤول الفرع</label>
-<input id="manager">
-
-<label>رقم الجوال</label>
-<input id="phone">
-
-<label>ساعات العمل الأحد - الخميس</label>
-<input id="weekday">
-
-<label>ساعات العمل الجمعة - السبت</label>
-<input id="weekend">
-
-<label>عنوان التعميم</label>
-<input id="title">
-
-<label>نص التعميم</label>
-<textarea id="content"></textarea>
-
-<label>رابط الشعار</label>
-<input id="logo">
-
-<label>رابط صورة التعميم</label>
-<input id="noticeImage">
-
-<label>رابط الخلفية</label>
-<input id="background">
-
-<label>لون السمة</label>
-<input type="color" id="themeColor" value="#003366">
-
-<button onclick="saveData()">
-💾 حفظ التعميم
-</button>
-
-</div>
-
-<script>
-
+<label>منصب المعتمد</label>
+<input id="position">
 function saveData(){
 
-localStorage.setItem("branch",branch.value);
-localStorage.setItem("supervisor",supervisor.value);
-localStorage.setItem("manager",manager.value);
-localStorage.setItem("phone",phone.value);
-localStorage.setItem("weekday",weekday.value);
-localStorage.setItem("weekend",weekend.value);
+const notice = {
 
-localStorage.setItem("title",title.value);
-localStorage.setItem("content",content.value);
+noticeNo: noticeNo.value,
+noticeDate: noticeDate.value,
 
-localStorage.setItem("logo",logo.value);
-localStorage.setItem("noticeImage",noticeImage.value);
-localStorage.setItem("background",background.value);
+company: company.value,
 
-localStorage.setItem("themeColor",themeColor.value);
+branch: branch.value,
+supervisor: supervisor.value,
+manager: manager.value,
+phone: phone.value,
 
-alert("تم حفظ التعميم");
+weekday: weekday.value,
+weekend: weekend.value,
 
-window.open("index.html");
+title: document.getElementById("title").value,
+content: content.value,
 
-}
+logo: logo.value,
+noticeImage: noticeImage.value,
+background: background.value,
 
-</script>
+themeColor: themeColor.value,
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+approvedBy: approvedBy.value,
+position: position.value,
 
-<head>
+createdAt: new Date().toISOString()
 
-<meta charset="UTF-8">
-<title>التعميم</title>
+};
 
-<link rel="stylesheet" href="style.css">
+localStorage.setItem(
+"currentNotice",
+JSON.stringify(notice)
+);
 
-</head>
-
-<body>
-
-<div class="notice">
-
-<div class="header">
-
-<img id="companyLogo">
-
-<h1 id="noticeTitle"></h1>
-
-</div>
-
-<img id="noticeImageView" class="notice-image">
-
-<div class="content-box">
-<p id="noticeContent"></p>
-</div>
-
-<table>
-
-<tr>
-<td class="title">🏢 اسم الفرع</td>
-<td id="branch"></td>
-</tr>
-
-<tr>
-<td class="title">👨‍💼 مشرف الفرع</td>
-<td id="supervisor"></td>
-</tr>
-
-<tr>
-<td class="title">📋 مسؤول الفرع</td>
-<td id="manager"></td>
-</tr>
-
-<tr>
-<td class="title">📱 رقم الجوال</td>
-<td id="phone"></td>
-</tr>
-
-<tr>
-<td class="title">🕒 الأحد - الخميس</td>
-<td id="weekday"></td>
-</tr>
-
-<tr>
-<td class="title">🌙 الجمعة - السبت</td>
-<td id="weekend"></td>
-</tr>
-
-</table>
-
-</div>
-
-<script src="script.js"></script>
-
-</body>
-</html>
-:root{
---theme:#003366;
-}
-
-body{
-font-family:Tahoma;
-margin:0;
-padding:20px;
-background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
-}
-
-.notice{
-background:rgba(255,255,255,.95);
-max-width:1100px;
-margin:auto;
-padding:30px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.15);
-}
-
-.header{
-text-align:center;
-border-bottom:5px solid var(--theme);
-padding-bottom:20px;
-margin-bottom:25px;
-}
-
-.header h1{
-color:var(--theme);
-}
-
-#companyLogo{
-max-height:120px;
-max-width:300px;
-}
-
-.notice-image{
-width:100%;
-border-radius:15px;
-margin-bottom:20px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-table td{
-padding:14px;
-border:1px solid #ddd;
-}
-
-.title{
-background:var(--theme);
-color:white;
-font-weight:bold;
-width:35%;
-}
-
-.content-box{
-background:#f8f8f8;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-line-height:2;
-}
-
-@media(max-width:768px){
-
-.notice{
-padding:15px;
-}
-
-.title{
-width:45%;
-}
+window.open("index.html","_blank");
 
 }
+const data = JSON.parse(
+localStorage.getItem("currentNotice")
+);
+
+if(data){
+
 document.body.style.backgroundImage =
-`url('${localStorage.getItem("background")}')`;
+`url('${data.background}')`;
 
 document.documentElement.style.setProperty(
 '--theme',
-localStorage.getItem("themeColor")
+data.themeColor
 );
 
-document.getElementById("companyLogo").src =
-localStorage.getItem("logo");
+companyLogo.src = data.logo;
 
-document.getElementById("noticeImageView").src =
-localStorage.getItem("noticeImage");
+noticeImageView.src = data.noticeImage;
 
-document.getElementById("noticeTitle").innerHTML =
-localStorage.getItem("title");
+noticeTitle.innerHTML = data.title;
 
-document.getElementById("noticeContent").innerHTML =
-localStorage.getItem("content");
+noticeContent.innerHTML = data.content;
 
-document.getElementById("branch").innerHTML =
-localStorage.getItem("branch");
+branch.innerHTML = data.branch;
 
-document.getElementById("supervisor").innerHTML =
-localStorage.getItem("supervisor");
+supervisor.innerHTML = data.supervisor;
 
-document.getElementById("manager").innerHTML =
-localStorage.getItem("manager");
+manager.innerHTML = data.manager;
 
-document.getElementById("phone").innerHTML =
-localStorage.getItem("phone");
+phone.innerHTML = data.phone;
 
-document.getElementById("weekday").innerHTML =
-localStorage.getItem("weekday");
+weekday.innerHTML = data.weekday;
 
-document.getElementById("weekend").innerHTML =
-localStorage.getItem("weekend");
-console.log(localStorage.getItem("branch"));
-console.log(localStorage.getItem("supervisor"));
+weekend.innerHTML = data.weekend;
+
+}
+<div class="top-bar">
+
+<div>
+رقم التعميم:
+<span id="noticeNoView"></span>
+</div>
+
+<div>
+التاريخ:
+<span id="noticeDateView"></span>
+</div>
+
+</div>
+.top-bar{
+display:flex;
+justify-content:space-between;
+background:#f3f6fa;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+font-weight:bold;
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<button id="downloadPdf">
+📄 تحميل PDF
+</button>
+document.getElementById("downloadPdf")
+.addEventListener("click",()=>{
+
+html2pdf().from(
+document.querySelector(".notice")
+).save();
+
+});
+<button onclick="shareNotice()">
+📤 مشاركة
+</button>
+.notice{
+
+backdrop-filter: blur(15px);
+
+border:1px solid rgba(255,255,255,.4);
+
+box-shadow:
+0 20px 60px rgba(0,0,0,.15);
+
+}
+
+.header h1{
+
+font-size:38px;
+
+font-weight:700;
+
+}
+
+table tr:hover{
+
+background:#f8fbff;
+
+transition:.3s;
+
+}
+
+button{
+
+transition:.3s;
+
+}
+
+button:hover{
+
+transform:translateY(-2px);
+
+}
+
 
