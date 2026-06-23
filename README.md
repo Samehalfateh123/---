@@ -309,3 +309,6 @@ localStorage.getItem("weekday");
 
 document.getElementById("weekend").innerHTML =
 localStorage.getItem("weekend");
+console.log(localStorage.getItem("branch"));
+console.log(localStorage.getItem("supervisor"));
+
