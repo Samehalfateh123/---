@@ -1,124 +1,100 @@
-/* ======================================
-   لوحة التحكم - نظام إدارة التعاميم
-   ====================================== */
-
-function saveData(){
-    
-    const notice = {
-        
-        noticeNo: document.getElementById("noticeNo").value,
-        noticeDate: document.getElementById("noticeDate").value,
-        
-        company: document.getElementById("company").value,
-        
-        branch: document.getElementById("branch").value,
-        supervisor: document.getElementById("supervisor").value,
-        manager: document.getElementById("manager").value,
-        phone: document.getElementById("phone").value,
-        
-        weekday: document.getElementById("weekday").value,
-        weekend: document.getElementById("weekend").value,
-        
-        title: document.getElementById("title").value,
-        content: document.getElementById("content").value,
-        
-        logo: document.getElementById("logo").value,
-        noticeImage: document.getElementById("noticeImage").value,
-        background: document.getElementById("background").value,
-        
-        themeColor: document.getElementById("themeColor").value,
-        
-        approvedBy: document.getElementById("approvedBy").value,
-        position: document.getElementById("position").value,
-        
-        createdAt: new Date().toISOString()
-        
-    };
-    
-    // حفظ في LocalStorage للعرض المباشر
-    localStorage.setItem(
-        "currentNotice",
-        JSON.stringify(notice)
-    );
-
-    // إضافة إلى الأرشيف
-    let archive = JSON.parse(localStorage.getItem('noticesArchive')) || [];
-    
-    // تجنب التكرار
-    if (!archive.some(n => n.noticeNo === notice.noticeNo)) {
-        notice.id = Date.now().toString();
-        archive.unshift(notice);
-        localStorage.setItem('noticesArchive', JSON.stringify(archive));
+class NoticeManager {
+    constructor() {
+        this.storageKey = 'notices_data';
+        this.initForm();
     }
-    
-    // إظهار رسالة تأكيد
-    showNotification('✅ تم حفظ التعميم بنجاح!');
-    
-    // فتح صفحة العرض
-    setTimeout(() => {
-        window.open("index.html","_blank");
-    }, 1000);
-}
 
-// دالة عرض الإخطارات
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        font-weight: 600;
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// تحميل البيانات المحفوظة
-function loadSavedData() {
-    const saved = JSON.parse(localStorage.getItem("currentNotice"));
-    if (saved) {
-        document.getElementById("noticeNo").value = saved.noticeNo || '';
-        document.getElementById("noticeDate").value = saved.noticeDate || '';
-        document.getElementById("company").value = saved.company || '';
-        document.getElementById("branch").value = saved.branch || '';
-        document.getElementById("supervisor").value = saved.supervisor || '';
-        document.getElementById("manager").value = saved.manager || '';
-        document.getElementById("phone").value = saved.phone || '';
-        document.getElementById("weekday").value = saved.weekday || '';
-        document.getElementById("weekend").value = saved.weekend || '';
-        document.getElementById("title").value = saved.title || '';
-        document.getElementById("content").value = saved.content || '';
-        document.getElementById("approvedBy").value = saved.approvedBy || '';
-        document.getElementById("position").value = saved.position || '';
+    initForm() {
+        document.getElementById('noticeForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveNotice();
+        });
     }
-}
 
-// إضافة أنماط للرسوم المتحركة
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
+    saveNotice() {
+        const notice = {
+            noticeNo: document.getElementById('noticeNo').value,
+            noticeDate: document.getElementById('noticeDate').value,
+            company: document.getElementById('company').value,
+            branch: document.getElementById('branch').value,
+            supervisor: document.getElementById('supervisor').value,
+            manager: document.getElementById('manager').value,
+            phone: document.getElementById('phone').value,
+            weekday: document.getElementById('weekday').value,
+            weekend: document.getElementById('weekend').value,
+            title: document.getElementById('title').value,
+            content: document.getElementById('content').value,
+            logo: document.getElementById('logo').value,
+            noticeImage: document.getElementById('noticeImage').value,
+            themeColor: document.getElementById('themeColor').value,
+            approvedBy: document.getElementById('approvedBy').value,
+            position: document.getElementById('position').value,
+            qrCode: document.getElementById('qrCode').value,
+            createdAt: new Date().toISOString(),
+            id: 'notice_' + Date.now()
+        };
+
+        let notices = JSON.parse(localStorage.getItem(this.storageKey)) || [];
+        notices.push(notice);
+        localStorage.setItem(this.storageKey, JSON.stringify(notices));
+        localStorage.setItem('currentNotice', JSON.stringify(notice));
+
+        alert('✅ تم حفظ التعميم بنجاح');
+        window.open('index.html', '_blank');
+        document.getElementById('noticeForm').reset();
+    }
+
+    getAllNotices() {
+        return JSON.parse(localStorage.getItem(this.storageKey)) || [];
+    }
+
+    displayNotices() {
+        const notices = this.getAllNotices();
+        const list = document.getElementById('noticesList');
+        
+        if (notices.length === 0) {
+            list.innerHTML = '<p>لا توجد تعاميم</p>';
+            return;
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-`;
-document.head.appendChild(style);
 
-// تحميل البيانات عند فتح الصفحة
-document.addEventListener('DOMContentLoaded', loadSavedData);
+        list.innerHTML = notices.map(notice => `
+            <div class="notice-item" onclick="viewNotice('${notice.id}')">
+                <h3>${notice.title}</h3>
+                <p><strong>رقم:</strong> ${notice.noticeNo}</p>
+                <p><strong>الشركة:</strong> ${notice.company}</p>
+                <p><strong>التاريخ:</strong> ${new Date(notice.noticeDate).toLocaleDateString('ar-SA')}</p>
+            </div>
+        `).join('');
+    }
+}
+
+const manager = new NoticeManager();
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.getElementById(tabName).classList.add('active');
+
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    if (tabName === 'view') {
+        manager.displayNotices();
+    }
+}
+
+function viewNotice(id) {
+    const notices = manager.getAllNotices();
+    const notice = notices.find(n => n.id === id);
+    if (notice) {
+        localStorage.setItem('currentNotice', JSON.stringify(notice));
+        window.open('index.html', '_blank');
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    manager.displayNotices();
+});
