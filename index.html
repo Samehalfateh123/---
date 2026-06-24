@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض التعميم</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- الشريط العلوي -->
+        <div class="top-bar">
+            <div class="notice-info">
+                <div class="info-item">
+                    <span class="label">رقم التعميم:</span>
+                    <span id="noticeNoView">---</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">التاريخ:</span>
+                    <span id="noticeDateView">---</span>
+                </div>
+            </div>
+            <div class="notice-actions">
+                <button id="downloadPdf" class="btn btn-primary">📄 تحميل PDF</button>
+                <button id="shareBtn" class="btn btn-secondary">📤 مشاركة</button>
+                <button id="printBtn" class="btn btn-secondary">🖨️ طباعة</button>
+                <a href="admin.html" class="btn btn-secondary">🔙 رجوع</a>
+            </div>
+        </div>
+
+        <!-- محتوى التعميم الرئيسي -->
+        <div class="notice" id="noticeContent">
+            <div class="notice-header">
+                <img id="companyLogo" src="" alt="شعار" class="logo">
+                <div class="header-info">
+                    <h1 id="noticeTitle">عنوان التعميم</h1>
+                    <p id="noticeCompany">الشركة</p>
+                </div>
+            </div>
+
+            <div id="noticeContentView" class="notice-body">
+                محتوى التعميم
+            </div>
+
+            <div class="notice-details">
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>الفرع:</label>
+                        <span id="branchView">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>المشرف:</label>
+                        <span id="supervisorView">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>المدير:</label>
+                        <span id="managerView">---</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>الهاتف:</label>
+                        <span id="phoneView">---</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="working-hours">
+                <h3>ساعات العمل</h3>
+                <div class="hours-grid">
+                    <div><strong>أيام الأسبوع:</strong> <span id="weekdayView">---</span></div>
+                    <div><strong>نهاية الأسبوع:</strong> <span id="weekendView">---</span></div>
+                </div>
+            </div>
+
+            <div class="notice-footer">
+                <div>
+                    <p><strong>معتمد من:</strong> <span id="approvedByView">---</span></p>
+                    <p><strong>المنصب:</strong> <span id="positionView">---</span></p>
+                </div>
+                <div style="text-align: center;">
+                    <img id="qrCodeView" src="" alt="QR" style="max-width: 150px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال المشاركة -->
+    <div id="shareModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeShareModal()">&times;</button>
+            <h2>مشاركة التعميم</h2>
+            <div class="share-options">
+                <label>رابط المشاركة:</label>
+                <div class="copy-container">
+                    <input type="text" id="shareLink" readonly>
+                    <button onclick="copyToClipboard()" class="btn-copy">📋 نسخ</button>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <img id="shareQR" src="" alt="QR" style="max-width: 200px; border: 1px solid #ddd; padding: 10px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="js/notice.js"></script>
+</body>
+</html>
