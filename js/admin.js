@@ -26,8 +26,7 @@ class NoticeManager {
     }
 
     ensureSampleItem() {
-        // إذا لم توجد بنود، أضف بندًا افتراضيًا واحدًا
-        const items = JSON.parse(localStorage.getItem('notice_items')) || [];
+        const items = this.itemsContainer.querySelectorAll('.item-card');
         if (items.length === 0) this.addItem('بند 1', '#ffffff', '#000000');
     }
 
@@ -36,15 +35,33 @@ class NoticeManager {
         const wrapper = document.createElement('div');
         wrapper.className = 'item-card';
         wrapper.dataset.id = id;
+        wrapper.style.background = item.bg || '#ffffff';
+        wrapper.style.color = item.color || '#000';
+        if (item.width) wrapper.style.width = item.width;
+        if (item.height) wrapper.style.height = item.height;
+        if (item.fontSize) wrapper.style.fontSize = item.fontSize.replace('px','') + 'px';
+
         wrapper.innerHTML = `
             <input class="item-title" placeholder="نص البند" value="${item.title || ''}">
             <div class="item-controls">
-                <label>خلفية: <input type="color" class="item-bg" value="${item.bg || '#ffffff'}"></label>
-                <label>نص: <input type="color" class="item-color" value="${item.color || '#000000'}"></label>
+                <label title="خلفية">خلفية <input type="color" class="item-bg" value="${item.bg || '#ffffff'}"></label>
+                <label title="لون النص">نص <input type="color" class="item-color" value="${item.color || '#000000'}"></label>
                 <button class="btn-item-size" data-action="-">➖</button>
                 <button class="btn-item-size" data-action="+">➕</button>
+                <button class="btn-item-font" data-action="-">A-</button>
+                <button class="btn-item-font" data-action="+">A+</button>
+                <button class="btn-item-bold">B</button>
+                <select class="item-icon-select">
+                    <option value="">أيـقونة</option>
+                    <option value="open">🏁 افتتاح</option>
+                    <option value="clock">⏰ دوام</option>
+                    <option value="info">ℹ️ معلومات</option>
+                    <option value="warning">⚠️ تحذير</option>
+                </select>
+                <input type="file" class="item-attach" accept="image/*,application/pdf" title="إرفاق صورة أو PDF">
                 <button class="btn-delete-item">🗑️ حذف</button>
             </div>
+            <div class="item-attach-preview"></div>
         `;
 
         const titleInput = wrapper.querySelector('.item-title');
@@ -52,18 +69,66 @@ class NoticeManager {
         const colorInput = wrapper.querySelector('.item-color');
         const deleteBtn = wrapper.querySelector('.btn-delete-item');
         const sizeBtns = wrapper.querySelectorAll('.btn-item-size');
+        const fontBtns = wrapper.querySelectorAll('.btn-item-font');
+        const boldBtn = wrapper.querySelector('.btn-item-bold');
+        const iconSelect = wrapper.querySelector('.item-icon-select');
+        const attachInput = wrapper.querySelector('.item-attach');
+        const attachPreview = wrapper.querySelector('.item-attach-preview');
+
+        // initialize states
+        if (item.bold) wrapper.dataset.bold = '1';
+        if (item.icon) iconSelect.value = item.icon;
+        if (item.attachment) {
+            attachPreview.innerHTML = item.attachmentPreview || '';
+            wrapper.dataset.attachment = item.attachment;
+        }
 
         // event handlers
-        deleteBtn.addEventListener('click', () => {
-            wrapper.remove();
-        });
+        deleteBtn.addEventListener('click', () => { wrapper.remove(); });
+
         sizeBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const action = btn.dataset.action;
-                const current = parseInt(wrapper.style.fontSize || '16');
+                const currentW = parseInt(wrapper.style.width || wrapper.getBoundingClientRect().width || 240);
+                const currentH = parseInt(wrapper.style.height || wrapper.getBoundingClientRect().height || 120);
+                if (action === '+') { wrapper.style.width = (currentW + 40) + 'px'; wrapper.style.height = (currentH + 20) + 'px'; }
+                else { wrapper.style.width = Math.max(120, currentW - 40) + 'px'; wrapper.style.height = Math.max(80, currentH - 20) + 'px'; }
+            });
+        });
+
+        fontBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                const current = parseInt(wrapper.style.fontSize || 16);
                 if (action === '+') wrapper.style.fontSize = (current + 2) + 'px';
                 else wrapper.style.fontSize = Math.max(10, current - 2) + 'px';
             });
+        });
+
+        boldBtn.addEventListener('click', () => {
+            if (wrapper.dataset.bold === '1') { wrapper.dataset.bold = '0'; wrapper.style.fontWeight = '400'; }
+            else { wrapper.dataset.bold = '1'; wrapper.style.fontWeight = '700'; }
+        });
+
+        bgInput.addEventListener('input', () => { wrapper.style.background = bgInput.value; });
+        colorInput.addEventListener('input', () => { wrapper.style.color = colorInput.value; });
+        iconSelect.addEventListener('change', () => { wrapper.dataset.icon = iconSelect.value; });
+
+        attachInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { alert('حجم الملف كبير جداً؛ الحد 5MB'); return; }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
+                wrapper.dataset.attachment = dataUrl;
+                if (file.type === 'application/pdf') {
+                    attachPreview.innerHTML = `<a class="attachment-link" href="${dataUrl}" target="_blank">عرض مرفق PDF</a>`;
+                } else {
+                    attachPreview.innerHTML = `<img src="${dataUrl}" style="max-width:100%; border-radius:6px;"/>`;
+                }
+            };
+            reader.readAsDataURL(file);
         });
 
         return wrapper;
@@ -82,11 +147,17 @@ class NoticeManager {
             const data = evt.target.result;
             const workbook = XLSX.read(data, { type: 'binary' });
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            // use sheet_to_html which includes simple formatting; then apply our CSS theme
             const html = XLSX.utils.sheet_to_html(firstSheet);
             this.excelPreview.innerHTML = html;
-            this.currentExcelHtml = html; // حفظ معاينة
+            this.currentExcelHtml = this.applyExcelStyling(this.excelPreview.innerHTML);
         };
         reader.readAsBinaryString(file);
+    }
+
+    applyExcelStyling(html) {
+        // wrap table to apply CSS from css/style.css .excel-area
+        return `<div class="excel-area">${html}</div>`;
     }
 
     saveNotice() {
@@ -110,25 +181,33 @@ class NoticeManager {
             externalLink: document.getElementById('externalLink').value || '',
             items: this.collectItems(),
             excelHtml: this.currentExcelHtml || '',
+            typography: {
+                fontFamily: document.body.style.fontFamily || '',
+                fontSize: document.getElementById('title') ? '16px' : '16px'
+            },
             createdAt: new Date().toISOString(),
             id: 'notice_' + Date.now()
         };
 
-        // حفظ محلي
         let notices = JSON.parse(localStorage.getItem(this.storageKey)) || [];
         notices.push(notice);
         localStorage.setItem(this.storageKey, JSON.stringify(notices));
         localStorage.setItem('currentNotice', JSON.stringify(notice));
 
-        // توليد رابط قابل للمشاركة باستخدام التشفير base64 (لا يحتاج تسجيل دخول)
-        const encoded = this.encodeNoticeForLink(notice);
-        const link = `${location.origin}${location.pathname.replace(/admin.html$/, '')}notice.html?d=${encoded}`;
+        // compress with LZ-string then base64 to shorten
+        const json = JSON.stringify(notice);
+        let encoded = '';
+        try {
+            encoded = LZString.compressToBase64(unescape(encodeURIComponent(json)));
+        } catch (e) {
+            encoded = btoa(json);
+        }
 
-        alert('✅ تم حفظ التعميم. تم إنشاء رابط المشاركة — سيتم نسخه إلى الحافظة.');
-        // نسخ الرابط
-        this.copyText(link);
-        // فتح صفحة العرض في تبويب جديد مع المعاينة
-        window.open(link, '_blank');
+        const base = `${location.origin}${location.pathname.replace(/admin.html$/, '')}notice.html?d=${encodeURIComponent(encoded)}`;
+
+        alert('✅ تم حفظ التعميم. تم إنشاء رابط المشاركة — تم نسخه إلى الحافظة.');
+        this.copyText(base);
+        window.open(base, '_blank');
         this.form.reset();
         this.excelPreview.innerHTML = '';
         this.itemsContainer.innerHTML = '';
@@ -144,27 +223,15 @@ class NoticeManager {
                 title: card.querySelector('.item-title').value,
                 bg: card.querySelector('.item-bg').value,
                 color: card.querySelector('.item-color').value,
-                fontSize: card.style.fontSize || ''
+                fontSize: card.style.fontSize || window.getComputedStyle(card).fontSize,
+                width: card.style.width || '',
+                height: card.style.height || '',
+                bold: card.dataset.bold === '1',
+                icon: card.dataset.icon || '',
+                attachment: card.dataset.attachment || ''
             });
         });
         return items;
-    }
-
-    encodeNoticeForLink(notice) {
-        const json = JSON.stringify(notice);
-        try {
-            return btoa(unescape(encodeURIComponent(json)));
-        } catch (e) {
-            return btoa(json);
-        }
-    }
-
-    decodeNoticeFromLink(encoded) {
-        try {
-            return JSON.parse(decodeURIComponent(escape(atob(encoded))));
-        } catch (e) {
-            return JSON.parse(atob(encoded));
-        }
     }
 
     copyText(text) {
@@ -176,19 +243,14 @@ class NoticeManager {
         ta.remove();
     }
 
-    getAllNotices() {
-        return JSON.parse(localStorage.getItem(this.storageKey)) || [];
-    }
+    getAllNotices() { return JSON.parse(localStorage.getItem(this.storageKey)) || []; }
 
     displayNotices(filter = '') {
         const notices = this.getAllNotices();
         const list = document.getElementById('noticesList');
         const filtered = notices.filter(n => (n.title + ' ' + n.content + ' ' + n.noticeNo + ' ' + n.company).toLowerCase().includes(filter.toLowerCase()));
 
-        if (filtered.length === 0) {
-            list.innerHTML = '<p>لا توجد تعاميم</p>';
-            return;
-        }
+        if (filtered.length === 0) { list.innerHTML = '<p>لا توجد تعاميم</p>'; return; }
 
         list.innerHTML = filtered.map(notice => `
             <div class="notice-item">
@@ -204,24 +266,19 @@ class NoticeManager {
             </div>
         `).join('');
 
-        // attach events
-        list.querySelectorAll('.btn-view').forEach(btn => {
-            btn.addEventListener('click', (e) => this.openNoticeById(e.target.dataset.id));
-        });
-        list.querySelectorAll('.btn-copy').forEach(btn => {
-            btn.addEventListener('click', (e) => this.copyLinkById(e.target.dataset.id));
-        });
-        list.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', (e) => this.deleteById(e.target.dataset.id));
-        });
+        list.querySelectorAll('.btn-view').forEach(btn => { btn.addEventListener('click', (e) => this.openNoticeById(e.target.dataset.id)); });
+        list.querySelectorAll('.btn-copy').forEach(btn => { btn.addEventListener('click', (e) => this.copyLinkById(e.target.dataset.id)); });
+        list.querySelectorAll('.btn-delete').forEach(btn => { btn.addEventListener('click', (e) => this.deleteById(e.target.dataset.id)); });
     }
 
     openNoticeById(id) {
         const notices = this.getAllNotices();
         const notice = notices.find(n => n.id === id);
         if (!notice) return alert('لم أجد التعميم');
-        const encoded = this.encodeNoticeForLink(notice);
-        const link = `${location.origin}${location.pathname.replace(/admin.html$/, '')}notice.html?d=${encoded}`;
+        const json = JSON.stringify(notice);
+        let encoded = '';
+        try { encoded = LZString.compressToBase64(unescape(encodeURIComponent(json))); } catch (e) { encoded = btoa(json); }
+        const link = `${location.origin}${location.pathname.replace(/admin.html$/, '')}notice.html?d=${encodeURIComponent(encoded)}`;
         window.open(link, '_blank');
     }
 
@@ -229,8 +286,10 @@ class NoticeManager {
         const notices = this.getAllNotices();
         const notice = notices.find(n => n.id === id);
         if (!notice) return alert('لم أجد التعميم');
-        const encoded = this.encodeNoticeForLink(notice);
-        const link = `${location.origin}${location.pathname.replace(/admin.html$/, '')}notice.html?d=${encoded}`;
+        const json = JSON.stringify(notice);
+        let encoded = '';
+        try { encoded = LZString.compressToBase64(unescape(encodeURIComponent(json))); } catch (e) { encoded = btoa(json); }
+        const link = `${location.origin}${location.pathname.replace(/admin.html$/, '')}notice.html?d=${encodeURIComponent(encoded)}`;
         this.copyText(link);
         alert('✅ تم نسخ الرابط');
     }
@@ -243,30 +302,17 @@ class NoticeManager {
         this.displayNotices();
     }
 
-    filterNotices(query) {
-        this.displayNotices(query);
-    }
+    filterNotices(query) { this.displayNotices(query); }
 }
 
 const manager = new NoticeManager();
 
 function switchTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
+    document.querySelectorAll('.tab-content').forEach(tab => { tab.classList.remove('active'); });
     document.getElementById(tabName).classList.add('active');
-
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    // event may be undefined if called programmatically
+    document.querySelectorAll('.menu-item').forEach(item => { item.classList.remove('active'); });
     if (typeof event !== 'undefined' && event.target) event.target.classList.add('active');
-
-    if (tabName === 'view') {
-        manager.displayNotices();
-    }
+    if (tabName === 'view') { manager.displayNotices(); }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    manager.displayNotices();
-});
+window.addEventListener('DOMContentLoaded', () => { manager.displayNotices(); });

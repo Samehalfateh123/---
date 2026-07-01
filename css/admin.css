@@ -1,169 +1,25 @@
-.admin-container {
-    display: flex;
-    gap: 20px;
-    min-height: 100vh;
-}
+/* additions for items and icons */
+.items-container { display:flex; flex-wrap:wrap; gap:12px; }
+.item-card { width:240px; min-height:120px; background:#fff; border:1px solid #eee; border-radius:8px; padding:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-size:16px; display:flex; flex-direction:column; gap:8px; }
+.item-card .item-title { width:100%; padding:8px; border-radius:6px; border:1px solid #ddd; }
+.item-controls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.btn-item-size { padding:6px 8px; border-radius:6px; }
+.btn-delete-item{ background:#ff6b6b; color:white; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
 
-.sidebar {
-    width: 250px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    position: sticky;
-    top: 20px;
-    height: fit-content;
-}
+/* item view on public notice */
+.items-area { display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
+.item-view { min-width:220px; min-height:120px; padding:14px; border-radius:10px; display:flex; align-items:center; justify-content:center; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
 
-.sidebar h2 {
-    margin-bottom: 20px;
-}
+/* lightbox */
+.lightbox-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:2000; }
+.lightbox-overlay img, .lightbox-overlay iframe { max-width:90%; max-height:90%; border-radius:8px; }
+.lightbox-close{ position:absolute; top:20px; right:20px; background:#fff; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; }
 
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+/* Styled excel preview */
+.excel-area table{ border-collapse:collapse; width:100%; max-width:100%; overflow:auto; }
+.excel-area th{ background: var(--primary); color:#fff; padding:8px; }
+.excel-area td{ border:1px solid #ddd; padding:6px; }
+.excel-area tr:nth-child(even){ background:#fbfbfb; }
 
-.menu-item {
-    padding: 12px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.menu-item:hover,
-.menu-item.active {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateX(-5px);
-}
-
-.main-content {
-    flex: 1;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.form-container {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-.form-section {
-    margin-bottom: 30px;
-    padding-bottom: 30px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.form-section h2 {
-    margin-bottom: 20px;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group textarea {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: inherit;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.form-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
-
-.form-actions .btn {
-    flex: 1;
-    padding: 12px 24px;
-}
-
-.notices-list {
-    display: grid;
-    gap: 15px;
-}
-
-.notice-item {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    border-right: 4px solid #667eea;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.notice-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.search-bar {
-    margin-bottom: 20px;
-}
-
-.search-bar input {
-    width: 100%;
-    max-width: 400px;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-}
-
-@media (max-width: 768px) {
-    .admin-container {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        position: static;
-    }
-
-    .menu {
-        flex-direction: row;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
+/* controls for typography */
+.notice { transition: all 0.2s ease; }
