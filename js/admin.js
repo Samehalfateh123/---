@@ -1,106 +1,103 @@
 class NoticeManager {
     constructor() {
-        this.storageKey = 'notices_data_v2';
+        this.storageKey = 'notices_data';
         this.initForm();
-        this.loadElements();
-        this.ensureSampleItem();
     }
 
-    loadElements() {
-        this.form = document.getElementById('noticeForm');
-        this.itemsContainer = document.getElementById('itemsContainer');
-        this.addItemBtn = document.getElementById('addItemBtn');
-        this.excelFile = document.getElementById('excelFile');
-        this.excelPreview = document.getElementById('excelPreview');
-        this.maxAttachmentInput = document.getElementById('maxAttachmentMB');
-
-        // default max attachment bytes (from MB input)
-        this.maxAttachmentBytes = (parseInt(this.maxAttachmentInput?.value) || 8) * 1024 * 1024;
-        this.maxAttachmentInput?.addEventListener('change', () => {
-            this.maxAttachmentBytes = (parseInt(this.maxAttachmentInput.value) || 8) * 1024 * 1024;
-        });
-
-        this.addItemBtn.addEventListener('click', () => this.addItem());
-        this.excelFile.addEventListener('change', (e) => this.handleExcel(e));
-        document.getElementById('searchNotice').addEventListener('input', (e) => this.filterNotices(e.target.value));
-    }
-@@
--        attachInput.addEventListener('change', (e) => {
--            const file = e.target.files[0];
--            if (!file) return;
--            if (file.size > 5 * 1024 * 1024) { alert('حجم الملف كبير جداً؛ الحد 5MB'); return; }
--            const reader = new FileReader();
--            reader.onload = (ev) => {
--                const dataUrl = ev.target.result;
--                wrapper.dataset.attachment = dataUrl;
--                if (file.type === 'application/pdf') {
--                    attachPreview.innerHTML = `<a class="attachment-link" href="${dataUrl}" target="_blank">عرض مرفق PDF</a>`;
--                } else {
--                    attachPreview.innerHTML = `<img src="${dataUrl}" style="max-width:100%; border-radius:6px;"/>`;
--                }
--            };
--            reader.readAsDataURL(file);
--        });
-+        attachInput.addEventListener('change', (e) => {
-+            const file = e.target.files[0];
-+            if (!file) return;
-+            if (file.size > (this.maxAttachmentBytes || 8 * 1024 * 1024)) {
-+                alert(`حجم الملف كبير جداً؛ الحد ${Math.round((this.maxAttachmentBytes||(8*1024*1024))/(1024*1024))}MB`);
-+                e.target.value = '';
-+                return;
-+            }
-+            const reader = new FileReader();
-+            reader.onload = (ev) => {
-+                const dataUrl = ev.target.result;
-+                wrapper.dataset.attachment = dataUrl;
-+                // default scale
-+                wrapper.dataset.attachmentScale = wrapper.dataset.attachmentScale || '1';
-+                if (file.type === 'application/pdf') {
-+                    attachPreview.innerHTML = `<a class="attachment-link" href="${dataUrl}" target="_blank">عرض مرفق PDF</a>`;
-+                } else {
-+                    attachPreview.innerHTML = `<div class="attachment-wrap" style="position:relative;display:flex;flex-direction:column;gap:6px;"><img src="${dataUrl}" style="max-width:100%; border-radius:6px;" data-scale="1"/></div>`;
-+                }
-+
-+                // add zoom controls for the attachment
-+                const controls = document.createElement('div');
-+                controls.className = 'attachment-controls';
-+                controls.innerHTML = `<button class="btn-attach-zoom" data-action="-">🔍-</button><button class="btn-attach-zoom" data-action="+">🔍+</button>`;
-+                attachPreview.appendChild(controls);
-+
-+                // attach listeners
-+                attachPreview.querySelectorAll('.btn-attach-zoom').forEach(btn => {
-+                    btn.addEventListener('click', () => {
-+                        const img = attachPreview.querySelector('img');
-+                        if (!img) return;
-+                        let scale = parseFloat(wrapper.dataset.attachmentScale || '1');
-+                        if (btn.dataset.action === '+') scale = Math.min(3, scale * 1.15);
-+                        else scale = Math.max(0.2, scale / 1.15);
-+                        wrapper.dataset.attachmentScale = scale.toFixed(2);
-+                        img.style.width = `${scale * 100}%`;
-+                    });
-+                });
-+            };
-+            reader.readAsDataURL(file);
-+        });
-@@
-    collectItems() {
-        const items = [];
-        this.itemsContainer.querySelectorAll('.item-card').forEach(card => {
-            items.push({
-                id: card.dataset.id,
-                title: card.querySelector('.item-title').value,
-                bg: card.querySelector('.item-bg').value,
-                color: card.querySelector('.item-color').value,
-                fontSize: card.style.fontSize || window.getComputedStyle(card).fontSize,
-                width: card.style.width || '',
-                height: card.style.height || '',
-                bold: card.dataset.bold === '1',
-                icon: card.dataset.icon || '',
--                attachment: card.dataset.attachment || ''
-+                attachment: card.dataset.attachment || '',
-+                attachmentScale: card.dataset.attachmentScale || '1'
+    initForm() {
+        const form = document.getElementById('noticeForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveNotice();
             });
-        });
-        return items;
+        }
+    }
+
+    saveNotice() {
+        const notice = {
+            noticeNo: document.getElementById('noticeNo').value,
+            noticeDate: document.getElementById('noticeDate').value,
+            company: document.getElementById('company').value,
+            branch: document.getElementById('branch').value,
+            supervisor: document.getElementById('supervisor').value,
+            manager: document.getElementById('manager').value,
+            phone: document.getElementById('phone').value,
+            weekday: document.getElementById('weekday').value,
+            weekend: document.getElementById('weekend').value,
+            title: document.getElementById('title').value,
+            content: document.getElementById('content').value,
+            logo: document.getElementById('logo').value,
+            noticeImage: document.getElementById('noticeImage').value,
+            themeColor: document.getElementById('themeColor').value,
+            approvedBy: document.getElementById('approvedBy').value,
+            position: document.getElementById('position').value,
+            qrCode: document.getElementById('qrCode').value,
+            createdAt: new Date().toISOString(),
+            id: 'notice_' + Date.now()
+        };
+
+        let notices = JSON.parse(localStorage.getItem(this.storageKey)) || [];
+        notices.push(notice);
+        localStorage.setItem(this.storageKey, JSON.stringify(notices));
+        localStorage.setItem('currentNotice', JSON.stringify(notice));
+
+        alert('✅ تم حفظ التعميم بنجاح');
+        window.open('index.html', '_blank');
+        document.getElementById('noticeForm').reset();
+    }
+
+    getAllNotices() {
+        return JSON.parse(localStorage.getItem(this.storageKey)) || [];
+    }
+
+    displayNotices() {
+        const notices = this.getAllNotices();
+        const list = document.getElementById('noticesList');
+        
+        if (notices.length === 0) {
+            list.innerHTML = '<p>لا توجد تعاميم</p>';
+            return;
+        }
+
+        list.innerHTML = notices.map(notice => `
+            <div class="notice-item" onclick="viewNotice('${notice.id}')">
+                <h3>${notice.title}</h3>
+                <p><strong>رقم:</strong> ${notice.noticeNo}</p>
+                <p><strong>الشركة:</strong> ${notice.company}</p>
+                <p><strong>التاريخ:</strong> ${new Date(notice.noticeDate).toLocaleDateString('ar-SA')}</p>
+            </div>
+        `).join('');
     }
 }
+
+const manager = new NoticeManager();
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.getElementById(tabName).classList.add('active');
+
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    if (tabName === 'view') {
+        manager.displayNotices();
+    }
+}
+
+function viewNotice(id) {
+    const notices = manager.getAllNotices();
+    const notice = notices.find(n => n.id === id);
+    if (notice) {
+        localStorage.setItem('currentNotice', JSON.stringify(notice));
+        window.open('index.html', '_blank');
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    manager.displayNotices();
+});

@@ -32,19 +32,25 @@ function displayArchive(notices) {
 }
 
 function setupFilters() {
-    document.getElementById('searchInput').addEventListener('input', filterArchive);
-    document.getElementById('companyFilter').addEventListener('change', filterArchive);
-    document.getElementById('dateFromFilter').addEventListener('change', filterArchive);
-    document.getElementById('dateToFilter').addEventListener('change', filterArchive);
-    document.getElementById('resetFilters').addEventListener('click', resetFilters);
+    const searchInput = document.getElementById('searchInput');
+    const companyFilter = document.getElementById('companyFilter');
+    const dateFromFilter = document.getElementById('dateFromFilter');
+    const dateToFilter = document.getElementById('dateToFilter');
+    const resetBtn = document.getElementById('resetFilters');
+
+    if (searchInput) searchInput.addEventListener('input', filterArchive);
+    if (companyFilter) companyFilter.addEventListener('change', filterArchive);
+    if (dateFromFilter) dateFromFilter.addEventListener('change', filterArchive);
+    if (dateToFilter) dateToFilter.addEventListener('change', filterArchive);
+    if (resetBtn) resetBtn.addEventListener('click', resetFilters);
 }
 
 function filterArchive() {
     const notices = JSON.parse(localStorage.getItem('notices_data')) || [];
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const company = document.getElementById('companyFilter').value;
-    const dateFrom = document.getElementById('dateFromFilter').value;
-    const dateTo = document.getElementById('dateToFilter').value;
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const company = document.getElementById('companyFilter')?.value || '';
+    const dateFrom = document.getElementById('dateFromFilter')?.value || '';
+    const dateTo = document.getElementById('dateToFilter')?.value || '';
 
     const filtered = notices.filter(notice => {
         const matchSearch = notice.noticeNo.includes(searchTerm) ||
@@ -64,22 +70,33 @@ function filterArchive() {
 }
 
 function resetFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('companyFilter').value = '';
-    document.getElementById('dateFromFilter').value = '';
-    document.getElementById('dateToFilter').value = '';
+    const searchInput = document.getElementById('searchInput');
+    const companyFilter = document.getElementById('companyFilter');
+    const dateFromFilter = document.getElementById('dateFromFilter');
+    const dateToFilter = document.getElementById('dateToFilter');
+
+    if (searchInput) searchInput.value = '';
+    if (companyFilter) companyFilter.value = '';
+    if (dateFromFilter) dateFromFilter.value = '';
+    if (dateToFilter) dateToFilter.value = '';
     loadArchive();
 }
 
 function updateStats(notices) {
-    document.getElementById('totalNotices').textContent = notices.length;
+    const totalNoticesEl = document.getElementById('totalNotices');
+    const totalCompaniesEl = document.getElementById('totalCompanies');
+    const latestNoticeEl = document.getElementById('latestNotice');
+
+    if (totalNoticesEl) totalNoticesEl.textContent = notices.length;
     
-    const companies = new Set(notices.map(n => n.company));
-    document.getElementById('totalCompanies').textContent = companies.size;
+    if (totalCompaniesEl) {
+        const companies = new Set(notices.map(n => n.company));
+        totalCompaniesEl.textContent = companies.size;
+    }
     
-    if (notices.length > 0) {
+    if (latestNoticeEl && notices.length > 0) {
         const latest = notices.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-        document.getElementById('latestNotice').textContent = new Date(latest.noticeDate).toLocaleDateString('ar-SA');
+        latestNoticeEl.textContent = new Date(latest.noticeDate).toLocaleDateString('ar-SA');
     }
 }
 
@@ -88,28 +105,44 @@ function openModal(id) {
     const notice = notices.find(n => n.id === id);
     
     if (notice) {
-        document.getElementById('modalTitle').textContent = notice.title;
-        document.getElementById('modalBody').innerHTML = `
-            <p><strong>رقم التعميم:</strong> ${notice.noticeNo}</p>
-            <p><strong>الشركة:</strong> ${notice.company}</p>
-            <p><strong>التاريخ:</strong> ${new Date(notice.noticeDate).toLocaleDateString('ar-SA')}</p>
-            <p><strong>المحتوى:</strong></p>
-            <div>${notice.content}</div>
-        `;
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+        const modalDeleteBtn = document.getElementById('modalDeleteBtn');
+        const noticeModal = document.getElementById('noticeModal');
+
+        if (modalTitle) modalTitle.textContent = notice.title;
+        if (modalBody) {
+            modalBody.innerHTML = `
+                <p><strong>رقم التعميم:</strong> ${notice.noticeNo}</p>
+                <p><strong>الشركة:</strong> ${notice.company}</p>
+                <p><strong>التاريخ:</strong> ${new Date(notice.noticeDate).toLocaleDateString('ar-SA')}</p>
+                <p><strong>المحتوى:</strong></p>
+                <div>${notice.content}</div>
+            `;
+        }
         
-        document.getElementById('modalDownloadBtn').onclick = () => downloadPDF(notice);
-        document.getElementById('modalDeleteBtn').onclick = () => deleteNotice(notice.id);
-        document.getElementById('noticeModal').style.display = 'flex';
+        if (modalDownloadBtn) modalDownloadBtn.onclick = () => downloadPDF(notice);
+        if (modalDeleteBtn) modalDeleteBtn.onclick = () => deleteNotice(notice.id);
+        if (noticeModal) noticeModal.style.display = 'flex';
     }
 }
 
-document.querySelector('.close-btn').addEventListener('click', () => {
-    document.getElementById('noticeModal').style.display = 'none';
-});
+const closeBtn = document.querySelector('.close-btn');
+if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('noticeModal');
+        if (modal) modal.style.display = 'none';
+    });
+}
 
-document.getElementById('modalCloseBtn').addEventListener('click', () => {
-    document.getElementById('noticeModal').style.display = 'none';
-});
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+if (modalCloseBtn) {
+    modalCloseBtn.addEventListener('click', () => {
+        const modal = document.getElementById('noticeModal');
+        if (modal) modal.style.display = 'none';
+    });
+}
 
 function downloadPDF(notice) {
     const content = `
@@ -137,7 +170,8 @@ function deleteNotice(id) {
         let notices = JSON.parse(localStorage.getItem('notices_data')) || [];
         notices = notices.filter(n => n.id !== id);
         localStorage.setItem('notices_data', JSON.stringify(notices));
-        document.getElementById('noticeModal').style.display = 'none';
+        const modal = document.getElementById('noticeModal');
+        if (modal) modal.style.display = 'none';
         loadArchive();
     }
 }

@@ -1,71 +1,108 @@
-    if (Array.isArray(notice.items)) {
-        notice.items.forEach(it => {
-            const card = document.createElement('div');
-            card.className = 'item-view';
-            card.textContent = it.title;
-            card.style.background = it.bg || '#fff';
-            card.style.color = it.color || '#000';
-            if (it.fontSize) card.style.fontSize = it.fontSize;
-            if (it.width) card.style.width = it.width;
-            if (it.height) card.style.height = it.height;
-            if (it.bold) card.style.fontWeight = '700';
+window.addEventListener('DOMContentLoaded', loadNotice);
 
-            // icon
-            if (it.icon) {
-                const span = document.createElement('div');
-                span.style.fontSize = '22px';
-                span.style.marginBottom = '6px';
-                if (it.icon === 'open') span.textContent = '🏁';
-                else if (it.icon === 'clock') span.textContent = '⏰';
-                else if (it.icon === 'info') span.textContent = 'ℹ️';
-                else if (it.icon === 'warning') span.textContent = '⚠️';
-                card.prepend(span);
+function loadNotice() {
+    const notice = JSON.parse(localStorage.getItem('currentNotice'));
+
+    if (!notice) {
+        console.warn('لا توجد بيانات');
+        return;
+    }
+
+    document.getElementById('noticeNoView').textContent = notice.noticeNo;
+    document.getElementById('noticeDateView').textContent = new Date(notice.noticeDate).toLocaleDateString('ar-SA');
+    document.getElementById('noticeTitle').textContent = notice.title;
+    document.getElementById('noticeCompany').textContent = notice.company;
+    document.getElementById('noticeContentView').innerHTML = notice.content;
+    document.getElementById('branchView').textContent = notice.branch;
+    document.getElementById('supervisorView').textContent = notice.supervisor;
+    document.getElementById('managerView').textContent = notice.manager;
+    document.getElementById('phoneView').textContent = notice.phone;
+    document.getElementById('weekdayView').textContent = notice.weekday;
+    document.getElementById('weekendView').textContent = notice.weekend;
+    document.getElementById('approvedByView').textContent = notice.approvedBy;
+    document.getElementById('positionView').textContent = notice.position;
+
+    if (notice.logo) {
+        document.getElementById('companyLogo').src = notice.logo;
+    }
+    if (notice.themeColor) {
+        document.documentElement.style.setProperty('--primary', notice.themeColor);
+    }
+
+    if (notice.qrCode) {
+        QRCode.toDataURL(notice.qrCode, {
+            errorCorrectionLevel: 'H',
+            type: 'image/jpeg',
+            quality: 0.95,
+            margin: 1,
+            width: 150
+        }, (err, url) => {
+            if (!err) {
+                document.getElementById('qrCodeView').src = url;
             }
-
-            // attachment
-            if (it.attachment) {
-                if (it.attachment.startsWith('data:application/pdf')) {
-                    const a = document.createElement('a');
-                    a.href = it.attachment;
-                    a.textContent = 'عرض مرفق PDF';
-                    a.target = '_blank';
-                    a.className = 'attachment-link';
-                    card.appendChild(a);
-                } else if (it.attachment.startsWith('data:image')) {
-                    const img = document.createElement('img');
-                    img.src = it.attachment;
-                    img.alt = it.title || '';
--                    img.style.maxWidth = '100%';
-+                    img.style.maxWidth = '100%';
-+                    // apply saved scale
-+                    const scale = parseFloat(it.attachmentScale || '1');
-+                    img.style.width = `${scale * 100}%`;
-                    img.style.borderRadius = '6px';
-                    img.addEventListener('click', () => openLightbox(it.attachment));
-+                    // add inline zoom controls for public view
-+                    const zc = document.createElement('div');
-+                    zc.className = 'attachment-controls';
-+                    zc.innerHTML = `<button class="btn-attach-zoom" data-action="-">🔍-</button><button class="btn-attach-zoom" data-action="+">🔍+</button>`;
-+                    zc.querySelectorAll('.btn-attach-zoom').forEach(btn => {
-+                        btn.addEventListener('click', () => {
-+                            let cur = parseFloat(img.style.width || '100%') / 100;
-+                            if (btn.dataset.action === '+') cur = Math.min(3, cur * 1.15);
-+                            else cur = Math.max(0.2, cur / 1.15);
-+                            img.style.width = `${cur * 100}%`;
-+                        });
-+                    });
-+                    const container = document.createElement('div');
-+                    container.style.display = 'flex';
-+                    container.style.flexDirection = 'column';
-+                    container.style.gap = '6px';
-+                    container.appendChild(img);
-+                    container.appendChild(zc);
-+                    card.appendChild(container);
-+                    itemsArea.appendChild(card);
-+                    return; // skip default append below since we've appended
-                }
-            }
-
-            itemsArea.appendChild(card);
         });
     }
+
+    window.currentNotice = notice;
+}
+
+const downloadBtn = document.getElementById('downloadPdf');
+if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+        const element = document.querySelector('.notice');
+        html2pdf().set({
+            margin: 10,
+            filename: `notice_${window.currentNotice.noticeNo}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        }).from(element).save();
+    });
+}
+
+const printBtn = document.getElementById('printBtn');
+if (printBtn) {
+    printBtn.addEventListener('click', () => {
+        window.print();
+    });
+}
+
+const shareBtn = document.getElementById('shareBtn');
+if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+        const shareLink = window.location.href;
+        document.getElementById('shareLink').value = shareLink;
+
+        QRCode.toDataURL(shareLink, {
+            errorCorrectionLevel: 'H',
+            type: 'image/jpeg',
+            quality: 0.95,
+            margin: 1,
+            width: 150
+        }, (err, url) => {
+            if (!err) {
+                document.getElementById('shareQR').src = url;
+            }
+        });
+
+        document.getElementById('shareModal').style.display = 'flex';
+    });
+}
+
+function closeShareModal() {
+    document.getElementById('shareModal').style.display = 'none';
+}
+
+function copyToClipboard() {
+    const input = document.getElementById('shareLink');
+    input.select();
+    document.execCommand('copy');
+    alert('✅ تم نسخ الرابط');
+}
+
+window.addEventListener('click', (e) => {
+    const modal = document.getElementById('shareModal');
+    if (e.target === modal) {
+        closeShareModal();
+    }
+});
