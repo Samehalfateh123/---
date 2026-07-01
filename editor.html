@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر التعميم</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- الشريط العلوي -->
+        <div class="editor-header">
+            <h1>📑 محرر التعميم</h1>
+            <div class="editor-buttons">
+                <button id="previewBtn" class="btn btn-secondary">👁️ معاينة</button>
+                <button id="saveEditorBtn" class="btn btn-primary">💾 حفظ</button>
+            </div>
+        </div>
+
+        <div class="editor-content">
+            <!-- الشريط العلوي -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <label>اختر التصميم:</label>
+                    <select id="templateSelect" class="form-control">
+                        <option value="modern">معاصر (Modern)</option>
+                        <option value="classic">كلاسيكي (Classic)</option>
+                        <option value="minimal">بسيط (Minimal)</option>
+                        <option value="colorful">ملون (Colorful)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="editor-sections">
+                <!-- مقسم المحتوع -->
+                <div id="sectionsContainer" class="sections-container">
+                    <div class="section" data-section-id="section-1">
+                        <div class="section-header">
+                            <input type="text" class="section-title" value="المقدمة" placeholder="عنوان القسم">
+                            <button class="btn-remove-section" onclick="removeSection(this)">❌</button>
+                        </div>
+                        <div class="section-content">
+                            <textarea class="section-text" placeholder="اكتب نص القسم..."></textarea>
+                            <div class="text-formatting">
+                                <button class="fmt-btn" onclick="toggleBold(this)"><strong>ب</strong></button>
+                                <button class="fmt-btn" onclick="increaseFontSize(this)">A+</button>
+                                <button class="fmt-btn" onclick="decreaseFontSize(this)">A-</button>
+                                <button class="fmt-btn" onclick="insertEmoji(this)">😊</button>
+                                <button class="fmt-btn" onclick="insertImage(this)">📷</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- زر إضافة قسم -->
+                <button id="addSectionBtn" class="btn btn-secondary" onclick="addNewSection()">+ إضافة قسم</button>
+            </div>
+        </div>
+
+        <!-- معاينة الإصدار -->
+        <div id="previewPanel" class="preview-panel" style="display:none;">
+            <div class="preview-header">
+                <h2>معاينة الإصدار</h2>
+                <button class="close-btn" onclick="closePreview()">&times;</button>
+            </div>
+            <div id="previewContent" class="preview-content">
+                <!-- بل الطلب -->
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال الرموز -->
+    <div id="emojiModal" class="modal" style="display:none;">
+        <div class="modal-content emoji-modal">
+            <button class="close-btn" onclick="closeEmojiModal()">&times;</button>
+            <div class="emoji-grid" id="emojiGrid"></div>
+        </div>
+    </div>
+
+    <!-- مودال تحميل الصور -->
+    <div id="imageUploadModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeImageUploadModal()">&times;</button>
+            <h2>إضافة صورة</h2>
+            <div class="upload-area">
+                <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+                <div class="image-preview-container">
+                    <img id="imagePreview" src="" style="display:none; max-width: 300px;">
+                    <div class="image-controls" style="display:none;">
+                        <label>حجم الصورة:</label>
+                        <input type="range" id="imageSize" min="50" max="500" value="300" oninput="updateImagePreview()">
+                        <p id="sizeDisplay">300px</p>
+                        <button class="btn btn-primary" onclick="confirmImageUpload()">إضافة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/editor.js"></script>
+</body>
+</html>

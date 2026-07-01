@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض التعميم</title>
+    <title>عرض التعميم العام</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/public-notice.css">
 </head>
 <body>
-    <div class="container">
+    <div class="public-container">
         <!-- الشريط العلوي -->
         <div class="top-bar">
             <div class="notice-info">
@@ -21,16 +22,13 @@
                 </div>
             </div>
             <div class="notice-actions">
-                <button id="editBtn" class="btn btn-secondary">✏️ تعديل</button>
-                <button id="publicShareBtn" class="btn btn-primary">🌐 مشاركة عامة</button>
                 <button id="downloadPdf" class="btn btn-primary">📄 تحميل PDF</button>
                 <button id="shareBtn" class="btn btn-secondary">📤 مشاركة</button>
                 <button id="printBtn" class="btn btn-secondary">🖨️ طباعة</button>
-                <a href="admin.html" class="btn btn-secondary">🔙 رجوع</a>
             </div>
         </div>
 
-        <!-- محتوى التعميم الرئيسي -->
+        <!-- محتوى التعميم -->
         <div class="notice" id="noticeContent">
             <div class="notice-header">
                 <img id="companyLogo" src="" alt="شعار" class="logo">
@@ -85,29 +83,11 @@
         </div>
     </div>
 
-    <!-- مودال المشاركة العامة -->
-    <div id="publicShareModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closePublicShareModal()">&times;</button>
-            <h2>مشاركة عامة</h2>
-            <div class="share-options">
-                <p>رابط مشاركة عام للرعايا:</p>
-                <div class="copy-container">
-                    <input type="text" id="publicShareLink" readonly>
-                    <button onclick="copyPublicLink()" class="btn-copy">📋 نسخ</button>
-                </div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <img id="publicShareQR" src="" alt="QR">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- مودال المشاركة الخاصة -->
+    <!-- مودال المشاركة -->
     <div id="shareModal" class="modal" style="display:none;">
         <div class="modal-content">
             <button class="close-btn" onclick="closeShareModal()">&times;</button>
-            <h2>مشاركة</h2>
+            <h2>مشاركة التعميم</h2>
             <div class="share-options">
                 <label>رابط المشاركة:</label>
                 <div class="copy-container">
@@ -131,6 +111,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script src="js/notice.js"></script>
+    <script src="js/public-notice.js"></script>
 </body>
 </html>

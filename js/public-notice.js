@@ -1,21 +1,37 @@
-window.addEventListener('DOMContentLoaded', loadNotice);
+window.addEventListener('DOMContentLoaded', loadPublicNotice);
 
-function loadNotice() {
-    const notice = JSON.parse(localStorage.getItem('currentNotice'));
+function loadPublicNotice() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const noticeId = urlParams.get('id');
+
+    let notice;
+    if (noticeId) {
+        const notices = JSON.parse(localStorage.getItem('notices_data')) || [];
+        notice = notices.find(n => n.id === noticeId);
+    } else {
+        notice = JSON.parse(localStorage.getItem('currentNotice'));
+    }
 
     if (!notice) {
-        console.warn('لا توجد بيانات');
+        document.getElementById('noticeContent').innerHTML = '<p>لم يتم العثور على التعميم</p>';
         return;
     }
 
+    displayNotice(notice);
+    window.currentNotice = notice;
+}
+
+function displayNotice(notice) {
     document.getElementById('noticeNoView').textContent = notice.noticeNo;
     document.getElementById('noticeDateView').textContent = new Date(notice.noticeDate).toLocaleDateString('ar-SA');
     document.getElementById('noticeTitle').textContent = notice.title;
     document.getElementById('noticeCompany').textContent = notice.company;
     
+    // عرض المحتوى مع التنسيق الربطي
     const contentDiv = document.getElementById('noticeContentView');
     contentDiv.innerHTML = notice.contentHTML || notice.content;
     
+    // إضافة event listeners للصور
     contentDiv.querySelectorAll('img').forEach(img => {
         img.addEventListener('click', function() {
             openImageModal(this.src);
@@ -51,8 +67,6 @@ function loadNotice() {
             }
         });
     }
-
-    window.currentNotice = notice;
 }
 
 function openImageModal(src) {
@@ -62,48 +76,6 @@ function openImageModal(src) {
 
 function closeImageModal() {
     document.getElementById('imageModal').style.display = 'none';
-}
-
-const editBtn = document.getElementById('editBtn');
-if (editBtn) {
-    editBtn.addEventListener('click', () => {
-        window.location.href = 'editor.html';
-    });
-}
-
-const publicShareBtn = document.getElementById('publicShareBtn');
-if (publicShareBtn) {
-    publicShareBtn.addEventListener('click', () => {
-        const notice = window.currentNotice;
-        if (!notice.id) {
-            notice.id = 'notice_' + Date.now();
-            localStorage.setItem('currentNotice', JSON.stringify(notice));
-        }
-        
-        let notices = JSON.parse(localStorage.getItem('notices_data')) || [];
-        const exists = notices.find(n => n.id === notice.id);
-        if (!exists) {
-            notices.push(notice);
-            localStorage.setItem('notices_data', JSON.stringify(notices));
-        }
-        
-        const publicUrl = `${window.location.origin}${window.location.pathname.replace('index.html', '')}public-notice.html?id=${notice.id}`;
-        document.getElementById('publicShareLink').value = publicUrl;
-        
-        QRCode.toDataURL(publicUrl, {
-            errorCorrectionLevel: 'H',
-            type: 'image/jpeg',
-            quality: 0.95,
-            margin: 1,
-            width: 200
-        }, (err, url) => {
-            if (!err) {
-                document.getElementById('publicShareQR').src = url;
-            }
-        });
-        
-        document.getElementById('publicShareModal').style.display = 'flex';
-    });
 }
 
 const downloadBtn = document.getElementById('downloadPdf');
@@ -130,7 +102,10 @@ if (printBtn) {
 const shareBtn = document.getElementById('shareBtn');
 if (shareBtn) {
     shareBtn.addEventListener('click', () => {
-        const shareLink = window.location.href;
+        const currentUrl = window.location.href;
+        const shareLink = currentUrl.includes('?') ? currentUrl : 
+                         `${window.location.origin}${window.location.pathname}?id=${window.currentNotice.id}`;
+        
         document.getElementById('shareLink').value = shareLink;
 
         QRCode.toDataURL(shareLink, {
@@ -149,36 +124,20 @@ if (shareBtn) {
     });
 }
 
-function closePublicShareModal() {
-    document.getElementById('publicShareModal').style.display = 'none';
-}
-
 function closeShareModal() {
     document.getElementById('shareModal').style.display = 'none';
-}
-
-function copyPublicLink() {
-    const input = document.getElementById('publicShareLink');
-    input.select();
-    document.execCommand('copy');
-    alert('✅ تم نسخ الرابط العام');
 }
 
 function copyToClipboard() {
     const input = document.getElementById('shareLink');
     input.select();
     document.execCommand('copy');
-    alert('✅ تم نسخ الرابط');
+    alert('✅ تم نسخ الرابط بنجاح');
 }
 
 window.addEventListener('click', (e) => {
-    const publicModal = document.getElementById('publicShareModal');
-    if (e.target === publicModal) {
-        closePublicShareModal();
-    }
-    
-    const shareModal = document.getElementById('shareModal');
-    if (e.target === shareModal) {
+    const modal = document.getElementById('shareModal');
+    if (e.target === modal) {
         closeShareModal();
     }
     
