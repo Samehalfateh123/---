@@ -70,10 +70,6 @@
                                 <label>معتمد من *</label>
                                 <input type="text" id="approvedBy" required>
                             </div>
-                            <div class="form-group">
-                                <label>المنصب *</label>
-                                <input type="text" id="position" required>
-                            </div>
                         </div>
                     </section>
 
@@ -101,6 +97,20 @@
                             <label>المحتوى *</label>
                             <textarea id="content" required rows="8"></textarea>
                         </div>
+
+                        <div class="form-group full-width">
+                            <label>بنود التعميم (يمكن الإضافة/الحذف والتخصيص)</label>
+                            <div id="itemsContainer" class="items-container"></div>
+                            <div style="margin-top:8px;">
+                                <button type="button" id="addItemBtn" class="btn">➕ إضافة بند</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>تحميل ملف Excel كمرفق (سيتم تحويله لجدول تلقائي)</label>
+                            <input type="file" id="excelFile" accept=".xlsx,.xls">
+                            <div id="excelPreview" style="margin-top:10px;"></div>
+                        </div>
                     </section>
 
                     <section class="form-section">
@@ -122,15 +132,19 @@
                     </section>
 
                     <section class="form-section">
-                        <h2>QR Code</h2>
+                        <h2>رابط وQR</h2>
                         <div class="form-group full-width">
-                            <label>رابط QR *</label>
-                            <input type="url" id="qrCode" required placeholder="https://example.com">
+                            <label>رابط خارجي داخل التعميم (اختياري)</label>
+                            <input type="url" id="externalLink" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>رابط QR (سيتم تحويله لصورة QR)</label>
+                            <input type="url" id="qrCode" placeholder="https://example.com">
                         </div>
                     </section>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">💾 حفظ وعرض</button>
+                        <button type="submit" class="btn btn-primary">💾 حفظ وإنشاء رابط قابل للمشاركة</button>
                         <button type="reset" class="btn btn-secondary">🔄 إعادة تعيين</button>
                     </div>
                 </form>
@@ -149,6 +163,8 @@
         </main>
     </div>
 
+    <!-- مكتبات خارجية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>
