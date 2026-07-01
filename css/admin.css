@@ -1,25 +1,4 @@
-/* additions for items and icons */
-.items-container { display:flex; flex-wrap:wrap; gap:12px; }
-.item-card { width:240px; min-height:120px; background:#fff; border:1px solid #eee; border-radius:8px; padding:10px; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-size:16px; display:flex; flex-direction:column; gap:8px; }
-.item-card .item-title { width:100%; padding:8px; border-radius:6px; border:1px solid #ddd; }
-.item-controls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.btn-item-size { padding:6px 8px; border-radius:6px; }
-.btn-delete-item{ background:#ff6b6b; color:white; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
-
-/* item view on public notice */
-.items-area { display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
-.item-view { min-width:220px; min-height:120px; padding:14px; border-radius:10px; display:flex; align-items:center; justify-content:center; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-
-/* lightbox */
-.lightbox-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:2000; }
-.lightbox-overlay img, .lightbox-overlay iframe { max-width:90%; max-height:90%; border-radius:8px; }
-.lightbox-close{ position:absolute; top:20px; right:20px; background:#fff; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; }
-
-/* Styled excel preview */
-.excel-area table{ border-collapse:collapse; width:100%; max-width:100%; overflow:auto; }
-.excel-area th{ background: var(--primary); color:#fff; padding:8px; }
-.excel-area td{ border:1px solid #ddd; padding:6px; }
-.excel-area tr:nth-child(even){ background:#fbfbfb; }
-
-/* controls for typography */
-.notice { transition: all 0.2s ease; }
+/* attachment controls */
+.attachment-controls{ display:flex; gap:6px; margin-top:6px; }
+.btn-attach-zoom{ padding:6px 8px; border-radius:6px; border:none; background:#f0f0f0; cursor:pointer; }
+.attachment-wrap img{ cursor:pointer; }
